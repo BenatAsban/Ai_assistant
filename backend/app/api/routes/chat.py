@@ -1,8 +1,6 @@
 from fastapi import APIRouter
 from app.schemas.schemas import ChatRequest, ChatResponse
 from app.services.llm_service import LLMService
-from langgraph_workflows.graph import app as workflow_app
-from langgraph_workflows.state import InteractionAgentState
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 llm_service = LLMService()
@@ -10,7 +8,7 @@ llm_service = LLMService()
 @router.post("", response_model=ChatResponse)
 def chat(request: ChatRequest):
     """
-    Process user message through LangGraph workflow and extract interaction data.
+    Process user message and extract interaction data.
     """
     try:
         # Extract structured data from message
@@ -22,22 +20,12 @@ def chat(request: ChatRequest):
         # Suggest follow-up actions
         follow_ups = llm_service.suggest_followup_actions(request.message)
         
-        # Run through LangGraph workflow
-        initial_state = InteractionAgentState(
-            messages=[{"role": "user", "content": request.message}],
-            current_step="start",
-            extracted_data=extracted_data,
-            user_input=request.message,
-            tool_results={},
-            final_output={},
-            sentiment=sentiment,
-            follow_ups=follow_ups,
-        )
-        
-        result = workflow_app.invoke(initial_state)
+        hcp_name = extracted_data.get('hcp_name', 'Unknown HCP')
+        interaction_type = extracted_data.get('interaction_type', 'Meeting')
+        date = extracted_data.get('date', 'TBD')
         
         return ChatResponse(
-            response=f"I've extracted the following information from your interaction: {extracted_data.get('hcp_name', 'Unknown HCP')} - {extracted_data.get('interaction_type', 'Meeting')} on {extracted_data.get('date', 'TBD')}",
+            response=f"I've extracted the following information from your interaction: {hcp_name} - {interaction_type} on {date}",
             extracted_data=extracted_data,
             sentiment=sentiment,
             follow_ups=follow_ups,

@@ -10,13 +10,15 @@ except ImportError:
 
 class LLMService:
     def __init__(self):
+        self.llm = None
         try:
-            self.llm = ChatGroq(
-                model=settings.GROQ_MODEL_PRIMARY,
-                api_key=settings.GROQ_API_KEY,
-                temperature=0.3,
-                max_tokens=1024,
-            )
+            if settings.GROQ_API_KEY and settings.GROQ_API_KEY != "":
+                self.llm = ChatGroq(
+                    model=settings.GROQ_MODEL_PRIMARY,
+                    api_key=settings.GROQ_API_KEY,
+                    temperature=0.3,
+                    max_tokens=1024,
+                )
         except Exception as e:
             print(f"Warning: Could not initialize Groq LLM: {e}")
             self.llm = None

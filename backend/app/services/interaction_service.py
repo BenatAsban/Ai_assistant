@@ -1,11 +1,18 @@
 from sqlalchemy.orm import Session
-from app.models import Interaction, HCP, FollowUp, User
+from app.models.models import Interaction, HCP, FollowUp, User
 from app.schemas.schemas import InteractionCreate, InteractionUpdate
 from datetime import datetime
 
 class InteractionService:
     @staticmethod
     def create_interaction(db: Session, interaction: InteractionCreate, user_id: int) -> Interaction:
+        # Ensure user exists
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            user = User(id=user_id, username=f"user_{user_id}", email=f"user_{user_id}@example.com")
+            db.add(user)
+            db.flush()
+        
         # Get or create HCP
         hcp = None
         if interaction.hcp_id:
