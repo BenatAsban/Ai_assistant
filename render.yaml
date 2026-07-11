@@ -1,0 +1,37 @@
+version: 1
+services:
+  backend:
+    build: ./backend
+    plan: starter
+    envVars:
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD
+        value: ${DATABASE_URL}
+      - key: GROQ_API_KEY
+        scope: RUN_AND_BUILD
+        value: ${GROQ_API_KEY}
+      - key: GROQ_MODEL_PRIMARY
+        scope: RUN_AND_BUILD
+        value: gemma2-9b-it
+      - key: GROQ_MODEL_FALLBACK
+        scope: RUN_AND_BUILD
+        value: llama-3.3-70b-versatile
+      - key: SECRET_KEY
+        scope: RUN_AND_BUILD
+        value: ${SECRET_KEY}
+      - key: ENVIRONMENT
+        scope: RUN_AND_BUILD
+        value: production
+      - key: DEBUG
+        scope: RUN_AND_BUILD
+        value: "false"
+
+  frontend:
+    build:
+      builder: npm
+      buildCommand: npm run build
+    plan: starter
+    envVars:
+      - key: VITE_API_BASE_URL
+        scope: BUILD
+        value: ${BACKEND_URL}
